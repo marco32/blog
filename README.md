@@ -1,11 +1,8 @@
 # blog.
 
-# Initial commit.
-
-# Commit.
->* Add request Ajax.
+# Add.
+>* request Ajax.
 >* Send and load in blog Okay.
-
-# Commit
->* Add Markdown.
->* Add function Delete.
+>* Markdown.
+>* Function Delete.
+>* Function change article.
