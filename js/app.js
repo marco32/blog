@@ -1,6 +1,5 @@
 $(document).ready(function() {
 	// Var global
-
 	var blog;
 	var article;
 	var date= new Date();
@@ -22,7 +21,7 @@ $(document).ready(function() {
 			success:{
 				alert("Mise a jour des données")
 			}
-		}
+		};
 
 		function load(){
 			$.ajax({ 
@@ -31,6 +30,7 @@ $(document).ready(function() {
 				key: 'BlogMarco', 
 			} 
 		})
+
 			.fail(function(){
 				$("#art").append('<div>'+"Mise à jour en cours veuillez réessayez plus tard"+'</div>')
 				$("#load").append('<div>'+"Mise à jour en cours veuillez réessayez plus tard"+'</div>')
@@ -44,38 +44,47 @@ $(document).ready(function() {
 					resume(blog);
 				}
 			})
-		}
+		};
+
 		function AddBlog(blog){
 
 			for (var i = 0; i < blog.length; i++) {
 				var add = blog[i]
+				var tradCorp = markdown.toHTML(add.corp);
 				$("#titre").append('<div><a href="'+"#"+[i]+'">'+add.titre+'</a></div>');
-				$("#art").append('<div id="'+[i]+'">'+add["corp"]+'</div>');
+				$("#art").append('<div id="'+[i]+'">'+tradCorp+'</div>');
 				$("#art").append('<div>'+add["date"]+'</div>');
 			}
 
-		}
+		};
 	
 	
 		function resume(blog){
 	
-		$("#Affcontenue").html(" ");
-		for (var i = 0; i < blog.length; i++) {
+			$("#Affcontenue").html(" ");
+				for (var i = 0; i < blog.length; i++) {
 		
-			var baff = blog[i] 
-			
-			var ligne = $('<tr/>').data("ID",i);
+					var baff = blog[i] 
+					var ligne = $('<tr/>');
+					$("<td>"+ baff["titre"] +"</td>").appendTo(ligne);
+					$("<td>" + baff["date"]+ "</td>" ).appendTo(ligne);
+					$('<td  name="'+ baff["titre"] +'" _id="'+baff["_id"]+'" content="'+ baff["corp"]+'">'+baff["corp"]+'</td>' ).appendTo(ligne);
+					$('<th><input type="button" id='+baff["_id"]+' value="X"/></th>' ).appendTo(ligne);
+					$("#Affcontenue").append( ligne ); 				
+				}	
+			};
 
-			$('<td/>').html(i).appendTo(ligne);
-			$("<td>"+ baff["titre"] +"</td>").appendTo(ligne);
-			$("<td>" + baff["date"]+ "</td>" ).appendTo(ligne);
-			$('<td><input name='+ baff["titre"] +' id='+baff["_id"]+' type="text" value="" date="'+ baff["date"]+' " placeholder="Réecrire l\'article"">'+ baff["corp"]+'</td>' ).appendTo(ligne);
-			$('<th><input type="button" id='+baff["_id"]+' value="X"/></th>' ).appendTo(ligne);
-			$("#Affcontenue").append( ligne ); 				
-		}	
-	}
+		function modif(mdfTitre, mdfCorp, mdfId){
+			$("#modif").append('<div>Modification</div>');
+			$("#modif").append('Titre<input id="mdfTitre" type="text" value="'+mdfTitre+'">');
+			$("#modif").append('Article<textarea id="mdfCorp" cols="30" rows="10">'+mdfCorp+'</textarea>');
+			$("#modif").append('<button id="mdfId" name="'+mdfId+'">Valider</button>');
+
+									
+		};
 	// Appel function
 	load();
+	
 // Delegate
  $("#Affcontenue").delegate('th', 'click', function(){
 	 	 var supp = $(this).attr("id");
@@ -87,16 +96,44 @@ $(document).ready(function() {
 	  	} 
 	  });	 
 	 	load();
-	 })
+	 });
 
-	$("#Affcontenue").delegate('input', 'change', function(){
-		 var id = $(this).attr("id")
+// Click function
+	$("#send").click(function(){
+		article={
+			"titre" : $("#Title").val(),
+			"corp" : $("#Textblog").val(),
+			"date" : mtn,
+		}
+		save();
+		$("#Title").val("");
+		$("#Text").html("");
+		$("#Textblog").val("");
+	});
+
+// keyup function
+	$("#Textblog").keyup(function(){
+		var mark = markdown.toHTML($(this).val());	
+		$("#Text").html(mark);
+	});
+
+// modification
+	$("#Affcontenue").delegate('td', 'click', function(){
+		var mdfTitre= $(this).attr("name");
+		var mdfCorp= $(this).attr("content");
+		var mdfId= $(this).attr("_id");
+		modif(mdfTitre, mdfCorp, mdfId);
+	});
+
+	$("#modif").delegate('button','click', function(){
+		 var id = $("#mdfId").attr("name")
 		 var ChangeJson={ 
-		 	"titre": $(this).attr("name"),
-		 	"corp": $(this).val(),
-		 	"date" : $(this).attr("date")
+		 	"titre": $("#mdfTitre").val(),
+		 	"corp": $("#mdfCorp").val(),
+		 	"date" : mtn,
 		 };
-		
+		console.log(id);
+		console.log(ChangeJson)
 	 	$.ajax({ 
 	 		url:'http://192.168.1.50/json-db', 
 	 		data: { task: "update",
@@ -106,27 +143,7 @@ $(document).ready(function() {
 	 	} 
 	 }) 
 	 load();
-	})
-
-	// Click function
-	$("#send").click(function(){
-		article={
-			"titre" : $("#Title").val(),
-			"corp" : $("#Text").html(),
-			"date" : mtn,
-		}
-		save();
-		$("#Title").val("");
-		$("#Text").html("");
-		$("#Textblog").val("");
-	})
-
-// keyup function
-	$("#Textblog").keyup(function(){
-		var mark = markdown.toHTML($(this).val());	
-		$("#Text").html(mark);
-	})
-// modification
-
+	 $("#modif").html("");
+	 })
 
 });
